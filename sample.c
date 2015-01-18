@@ -4,14 +4,12 @@
 
 #define WIN_NAME "Image"
 
+#define HEIGHT 500
+#define WIDTH  500
+
+
 int main(int argc, char **argv)
 {
-  IplImage *src_img = cvLoadImage("images/lenna.png", CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR);
-
-  if (!src_img) {
-    return -1;
-  }
-
   CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade *)cvLoad("data/haarcascade_frontalface_default.xml", NULL, NULL, NULL);
 
   if (!cascade) {
@@ -19,43 +17,59 @@ int main(int argc, char **argv)
   }
 
   CvMemStorage* storage = cvCreateMemStorage(0);
-  CvSeq* faces = cvHaarDetectObjects(
-    src_img,
-    cascade,
-    storage,
-    1.1,
-    3,
-    0,
-    cvSize(0, 0),
-    cvSize(0, 0)
-  );
+
+  CvSeq* faces;
+  CvRect *face;
+  IplImage *frame;
+
+  CvCapture *capture = cvCreateCameraCapture(0);
+  cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+  cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
   int i;
-  CvRect *face;
 
-  for (i = 0; i < faces->total; ++i) {
-    face = (CvRect *)cvGetSeqElem(faces, i);
+  cvNamedWindow(WIN_NAME, CV_WINDOW_AUTOSIZE);
 
-    cvRectangle(
-      src_img,
-      cvPoint(face->x, face->y),
-      cvPoint(face->x + face->width, face->y + face->height),
-      CV_RGB(255, 0, 0),
+  while (1) {
+    frame = cvQueryFrame(capture);
+
+    faces = cvHaarDetectObjects(
+      frame,
+      cascade,
+      storage,
+      1.1,
       3,
-      8,
-      0
+      0,
+      cvSize(0, 0),
+      cvSize(0, 0)
     );
+
+    for (i = 0; i < faces->total; ++i) {
+      face = (CvRect *)cvGetSeqElem(faces, i);
+
+      cvRectangle(
+        frame,
+        cvPoint(face->x, face->y),
+        cvPoint(face->x + face->width, face->y + face->height),
+        CV_RGB(255, 0, 0),
+        3,
+        8,
+        0
+      );
+    }
+
+    cvShowImage(WIN_NAME, frame);
+
+    if ('q' == cvWaitKey(10)) {
+      break;
+    }
   }
 
+  cvReleaseImage(&frame);
   cvReleaseMemStorage(&storage);
   cvReleaseHaarClassifierCascade(&cascade);
 
-  cvNamedWindow(WIN_NAME, CV_WINDOW_AUTOSIZE);
-  cvShowImage(WIN_NAME, src_img);
-  cvWaitKey(0);
-
   cvDestroyWindow(WIN_NAME);
-  cvReleaseImage(&src_img);
 
   return 0;
 }
