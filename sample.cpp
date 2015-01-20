@@ -1,3 +1,4 @@
+#include <iostream>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <opencv/cxcore.h>
@@ -10,7 +11,7 @@
 
 int main(int argc, char **argv)
 {
-  CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade *)cvLoad("data/haarcascade_frontalface_default.xml", NULL, NULL, NULL);
+  CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade *)cvLoad("data/haarcascade_frontalface_default.xml");
 
   if (!cascade) {
     return -1;
@@ -39,9 +40,7 @@ int main(int argc, char **argv)
       storage,
       1.1,
       3,
-      0,
-      cvSize(0, 0),
-      cvSize(0, 0)
+      0
     );
 
     for (i = 0; i < faces->total; ++i) {
@@ -52,9 +51,7 @@ int main(int argc, char **argv)
         cvPoint(face->x, face->y),
         cvPoint(face->x + face->width, face->y + face->height),
         CV_RGB(255, 0, 0),
-        3,
-        8,
-        0
+        3
       );
     }
 

@@ -3,7 +3,7 @@ CFLAGS = -Wall $(shell pkg-config --libs --cflags opencv)
 
 PROG = sample
 
-SRCS = sample.c
+SRCS = sample.cpp
 LIBS =
 
 $(PROG): $(SRCS) $(LIBS)
